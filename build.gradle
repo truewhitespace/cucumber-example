@@ -1,0 +1,68 @@
+plugins {
+	id 'java'
+	id 'org.springframework.boot' version '3.0.6'
+	id 'io.spring.dependency-management' version '1.1.0'
+}
+
+group = 'gov.dhs.uscis'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '17'
+
+repositories {
+	mavenCentral()
+	jcenter()
+}
+
+configurations {
+	cucumberRuntime {
+		extendsFrom testImplementation
+	}
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation 'io.rest-assured:rest-assured:5.3.0'
+	testImplementation 'io.rest-assured:json-schema-validator:5.3.0'
+	testImplementation 'io.cucumber:cucumber-java:7.12.0'
+	testImplementation 'io.cucumber:cucumber-junit:7.12.0'
+	testImplementation 'org.junit.jupiter:junit-jupiter'
+
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+}
+
+tasks.register('runApp', JavaExec) {
+	mainClass = 'gov.dhs.uscis.functionaltests.FunctionalTestsApplication'
+	classpath = sourceSets.main.runtimeClasspath
+	standardInput = System.in
+}
+
+tasks.register('functionaltests', JavaExec) {
+	dependsOn runApp
+
+	mainClass = 'io.cucumber.core.cli.Main'
+	classpath = configurations.cucumberRuntime + sourceSets.main.output + sourceSets.test.output
+	args = [
+			'--plugin', 'pretty',
+			'--glue', 'gov.dhs.uscis.functionaltests.functional',
+			'src/test/resources' // Replace with your Cucumber feature file location
+	]
+	doFirst {
+		// Delay execution until the Spring Boot application has fully started
+		startParameter.executable = 'java'
+		startParameter.args = ['-Dexec.mainClass=${runApp.main}', '-Dexec.classpath=${sourceSets.main.runtimeClasspath.asPath}']
+		startParameter.systemProperties = System.properties
+		runApp.mustRunAfter startParameter
+	}
+	finalizedBy stopApp
+}
+
+tasks.register('stopApp', Exec) {
+	dependsOn runApp
+	commandLine 'curl', '-X', 'POST', 'http://localhost:8080/actuator/shutdown'
+	ignoreExitValue true
+}
