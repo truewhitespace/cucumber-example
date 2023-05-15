@@ -51,13 +51,6 @@ tasks.register('functionaltests', JavaExec) {
 			'--glue', 'gov.dhs.uscis.functionaltests.functional',
 			'src/test/resources' // Replace with your Cucumber feature file location
 	]
-	doFirst {
-		// Delay execution until the Spring Boot application has fully started
-		startParameter.executable = 'java'
-		startParameter.args = ['-Dexec.mainClass=${runApp.main}', '-Dexec.classpath=${sourceSets.main.runtimeClasspath.asPath}']
-		startParameter.systemProperties = System.properties
-		runApp.mustRunAfter startParameter
-	}
 //	finalizedBy stopApp
 }
 
