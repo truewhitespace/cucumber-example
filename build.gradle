@@ -35,14 +35,14 @@ tasks.named('test') {
 	useJUnitPlatform()
 }
 
-tasks.register('runApp', JavaExec) {
-	mainClass = 'gov.dhs.uscis.functionaltests.FunctionalTestsApplication'
-	classpath = sourceSets.main.runtimeClasspath
-	standardInput = System.in
-}
+//tasks.register('runApp', JavaExec) {
+//	mainClass = 'gov.dhs.uscis.functionaltests.FunctionalTestsApplication'
+//	classpath = sourceSets.main.runtimeClasspath
+//	standardInput = System.in
+//}
 
 tasks.register('functionaltests', JavaExec) {
-	dependsOn runApp
+//	dependsOn runApp
 
 	mainClass = 'io.cucumber.core.cli.Main'
 	classpath = configurations.cucumberRuntime + sourceSets.main.output + sourceSets.test.output
@@ -58,11 +58,11 @@ tasks.register('functionaltests', JavaExec) {
 		startParameter.systemProperties = System.properties
 		runApp.mustRunAfter startParameter
 	}
-	finalizedBy stopApp
+//	finalizedBy stopApp
 }
 
-tasks.register('stopApp', Exec) {
-	dependsOn runApp
-	commandLine 'curl', '-X', 'POST', 'http://localhost:8080/actuator/shutdown'
-	ignoreExitValue true
-}
+//tasks.register('stopApp', Exec) {
+//	dependsOn runApp
+//	commandLine 'curl', '-X', 'POST', 'http://localhost:8080/actuator/shutdown'
+//	ignoreExitValue true
+//}
